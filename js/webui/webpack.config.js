@@ -26,7 +26,7 @@ function configCommon(config, params)
     });
 
     config.module.rules.push({
-        test: /(\.svg|\.png)$/,
+        test: /(\.svg|\.png|\.webp)$/,
         loader: 'url-loader',
         options: {
             name: '[name].[ext]',

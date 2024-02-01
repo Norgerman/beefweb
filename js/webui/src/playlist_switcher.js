@@ -19,13 +19,13 @@ const PlaylistTabHandle = SortableHandle(PlaylistTabHandle_);
 
 class PlaylistTab_ extends React.PureComponent
 {
-    componentDidMount()
-    {
-        const { playlist, currentPlaylistId } = this.props;
+    // componentDidMount()
+    // {
+    //     const { playlist, currentPlaylistId } = this.props;
 
-        if (playlist.id === currentPlaylistId)
-            this.element.scrollIntoView();
-    }
+    //     if (playlist.id === currentPlaylistId)
+    //         this.element.scrollIntoView();
+    // }
 
     render()
     {

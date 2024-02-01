@@ -622,10 +622,48 @@ body {
 
 .playback-info-bar {
     font-style: italic;
-    height: 2.25rem;
+    height: calc(128px + 1.0rem + 0.125rem);
     text-align: center;
     padding: 0.5rem;
+    display: flex;
     .no-text-overflow();
+
+    .cover {
+        display: flex;
+        width: 128px;
+        min-width: 128px;
+        max-width: 128px;
+        height: 128px;
+        align-items: center;
+        justify-content: center;
+
+        img {
+            display: block;
+            max-width: 128px;
+            max-height: 128px;
+        }
+    }
+
+    .title {
+        display: inline-flex;
+        width: 100%;
+        height: 100%;
+        margin-left: 0.5rem;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+
+        .title-item {
+            width: 100%;
+            display: inline-block;
+            text-align: center;
+            .no-text-overflow();
+        }
+
+        .title-item:not(:first-child) {
+            margin-top: 0.5rem;
+        }
+    }
 }
 
 .control-bar {
