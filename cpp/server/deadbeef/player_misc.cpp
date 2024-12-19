@@ -46,6 +46,27 @@ void PlayerImpl::disconnect()
     artworkFetcher_.reset();
 }
 
+boost::unique_future<ArtworkResult> PlayerImpl::fetchCurrentArtwork()
+{
+    if (!artworkFetcher_)
+    {
+        return boost::make_future(ArtworkResult());
+    }
+
+    PlaylistLockGuard lock(playlistMutex_);
+
+    PlaylistItemPtr item(ddbApi->streamer_get_playing_track());
+    if (!item)
+        return boost::make_future(ArtworkResult());
+
+    PlaylistPtr playlist;
+    int playlistIndex = ddbApi->streamer_get_current_playlist();
+    if (playlistIndex >= 0)
+        playlist.reset(ddbApi->plt_get_for_idx(playlistIndex));
+
+    return artworkFetcher_->fetchArtwork(std::move(playlist), std::move(item));
+}
+
 boost::unique_future<ArtworkResult> PlayerImpl::fetchArtwork(const ArtworkQuery& query)
 {
     if (!artworkFetcher_)
@@ -75,7 +96,7 @@ void PlayerImpl::handleMessage(uint32_t id, uintptr_t, uint32_t p1, uint32_t)
     case DB_EV_PAUSED:
     case DB_EV_SEEKED:
     case DB_EV_VOLUMECHANGED:
-        emitEvent(PlayerEvent::PLAYER_CHANGED);
+        emitEvents(PlayerEvents::PLAYER_CHANGED);
         break;
 
     case DB_EV_PLAYLISTCHANGED:
@@ -83,15 +104,18 @@ void PlayerImpl::handleMessage(uint32_t id, uintptr_t, uint32_t p1, uint32_t)
         {
         case DDB_PLAYLIST_CHANGE_CONTENT:
             // Notify player change for the case when currently played item is reordered or removed
-            emitEvent(PlayerEvent::PLAYER_CHANGED);
-            emitEvent(PlayerEvent::PLAYLIST_ITEMS_CHANGED);
+            emitEvents(PlayerEvents::PLAYER_CHANGED | PlayerEvents::PLAYLIST_ITEMS_CHANGED);
             break;
 
         case DDB_PLAYLIST_CHANGE_CREATED:
-        case DDB_PLAYLIST_CHANGE_DELETED:
         case DDB_PLAYLIST_CHANGE_TITLE:
+            emitEvents(PlayerEvents::PLAYLIST_SET_CHANGED);
+            break;
+
+        case DDB_PLAYLIST_CHANGE_DELETED:
         case DDB_PLAYLIST_CHANGE_POSITION:
-            emitEvent(PlayerEvent::PLAYLIST_SET_CHANGED);
+            // Reordering or removing playlists might change index of currently playing playlist
+            emitEvents(PlayerEvents::PLAYER_CHANGED | PlayerEvents::PLAYLIST_SET_CHANGED);
             break;
         }
 

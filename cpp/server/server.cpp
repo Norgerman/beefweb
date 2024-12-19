@@ -21,7 +21,7 @@ Server::Server(ServerCorePtr core, ServerConfigPtr config)
     core_->bind(config_->port, config_->allowRemote);
 
     dispatchEventsTimer_ = core_->timerFactory()->createTimer();
-    dispatchEventsTimer_->setCallback([this] (Timer*) { doDispatchEvents(); });
+    dispatchEventsTimer_->setCallback([this](Timer*) { doDispatchEvents(); });
     dispatchEventsTimer_->runOnce(eventDispatchDelay());
 }
 
@@ -59,8 +59,7 @@ void Server::onRequestReady(RequestCore* corereq)
 
     registerContext(context);
 
-    context->workQueue->enqueue([context]
-    {
+    context->workQueue->enqueue([context] {
         if (auto server = context->server.lock())
             server->runHandlerAndProcessResponse(context);
     });
@@ -80,21 +79,19 @@ void Server::onRequestDone(RequestCore* corereq)
 
 void Server::runHandlerAndProcessResponse(RequestContextPtr context)
 {
-    config_->filters.execute(&context->request);
+    config_->filters.beginRequest(&context->request);
 
     processResponse(context);
 }
 
 void Server::produceAndSendEvent(RequestContextPtr context)
 {
-    context->workQueue->enqueue([context]
-    {
+    context->workQueue->enqueue([context] {
         produceEvent(context.get());
 
         if (auto server1 = context->server.lock())
         {
-            server1->core_->workQueue()->enqueue([context]
-            {
+            server1->core_->workQueue()->enqueue([context] {
                 if (auto server2 = context->server.lock())
                     server2->sendEvent(context);
             });
@@ -104,8 +101,7 @@ void Server::produceAndSendEvent(RequestContextPtr context)
 
 void Server::produceEvent(RequestContext* context)
 {
-    bool produced = tryCatchLog([context]
-    {
+    bool produced = tryCatchLog([context] {
         context->lastEvent = context->eventStreamResponse->source();
     });
 
@@ -135,15 +131,31 @@ void Server::sendResponse(RequestContextPtr context)
 
 void Server::processResponse(RequestContextPtr context)
 {
-    Response* response = context->response();
+    if (auto asyncResponse = dynamic_cast<AsyncResponse*>(context->response()))
+    {
+        asyncResponse->responseFuture.then(
+            boost::launch::sync, [context](ResponseFuture resp) {
+                auto nextResponse = AsyncResponse::unpack(std::move(resp));
+                if (nextResponse)
+                    nextResponse->addHeaders(context->response()->headers);
 
-    if (auto eventStreamResponse = dynamic_cast<EventStreamResponse*>(response))
+                context->request.response = std::move(nextResponse);
+
+                if (auto server = context->server.lock())
+                    server->processResponse(context);
+            });
+
+        return;
+    }
+
+    config_->filters.endRequest(&context->request);
+
+    if (auto eventStreamResponse = dynamic_cast<EventStreamResponse*>(context->response()))
     {
         context->eventStreamResponse = eventStreamResponse;
         produceEvent(context.get());
 
-        core_->workQueue()->enqueue([context]
-        {
+        core_->workQueue()->enqueue([context] {
             if (auto server = context->server.lock())
                 server->beginSendEventStream(context);
         });
@@ -151,29 +163,10 @@ void Server::processResponse(RequestContextPtr context)
         return;
     }
 
-     if (auto asyncResponse = dynamic_cast<AsyncResponse*>(response))
-     {
-         asyncResponse->responseFuture.then(
-            boost::launch::sync, [context] (ResponseFuture resp)
-         {
-             auto nextResponse = AsyncResponse::unpack(std::move(resp));
-             if (nextResponse)
-                 nextResponse->addHeaders(context->response()->headers);
-
-             context->request.response = std::move(nextResponse);
-
-             if (auto server = context->server.lock())
-                 server->processResponse(context);
-         });
-
-         return;
-     }
-
-     core_->workQueue()->enqueue([context]
-     {
-         if (auto server = context->server.lock())
+    core_->workQueue()->enqueue([context] {
+        if (auto server = context->server.lock())
             server->sendResponse(context);
-     });
+    });
 }
 
 void Server::beginSendEventStream(RequestContextPtr context)
@@ -195,8 +188,7 @@ void Server::dispatchEvents()
 
     if (dispatchEventsRequested_.compare_exchange_strong(expected, true))
     {
-        core_->workQueue()->enqueue([this]
-        {
+        core_->workQueue()->enqueue([this] {
             dispatchEventsTimer_->runOnce(eventDispatchDelay());
         });
     }

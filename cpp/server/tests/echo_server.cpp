@@ -59,8 +59,7 @@ public:
             if (delay <= 0)
                 throw InvalidRequestException("delay should greater than 0");
 
-            return Response::async(boost::async([this, delay]
-            {
+            return Response::async(boost::async([this, delay] {
                 std::this_thread::sleep_for(std::chrono::seconds(*delay));
                 return ResponsePtr(Response::json(buildResponse()));
             }));
@@ -109,8 +108,8 @@ public:
 
         EchoController::defineRoutes(router, &workQueue_);
 
-        filters->addFilter(std::make_unique<EchoHeadersFilter>());
-        filters->addFilter(std::make_unique<ExecuteHandlerFilter>());
+        filters->add(std::make_unique<EchoHeadersFilter>());
+        filters->add(std::make_unique<ExecuteHandlerFilter>());
 
         return config;
     }
@@ -145,8 +144,7 @@ int testMain(int argc, char** argv)
         }
     }
 
-    EchoServer server(allowRemote, []
-    {
+    EchoServer server(allowRemote, [] {
         logInfo("server is running");
         logInfo("press q<ENTER> to stop");
         logInfo("press e<ENTER> to dispatch events");

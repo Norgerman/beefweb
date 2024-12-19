@@ -17,21 +17,20 @@ ServerHost::ServerHost(Player* player)
     : player_(player)
 {
     playerWorkQueue_ = player_->createWorkQueue();
-    player_->onEvent([this] (PlayerEvent event) { handlePlayerEvent(event); });
+    player_->onEvents([this](PlayerEvents event) { handlePlayerEvents(event); });
     serverThread_ = std::make_unique<ServerThread>();
 }
 
 ServerHost::~ServerHost()
 {
-    player_->onEvent(PlayerEventCallback());
+    player_->onEvents(PlayerEventsCallback());
 }
 
-void ServerHost::handlePlayerEvent(PlayerEvent event)
+void ServerHost::handlePlayerEvents(PlayerEvents events)
 {
-    dispatcher_.dispatch(event);
+    dispatcher_.dispatch(events);
     serverThread_->dispatchEvents();
 }
-
 
 void ServerHost::reconfigure(SettingsDataPtr settings)
 {
@@ -41,15 +40,15 @@ void ServerHost::reconfigure(SettingsDataPtr settings)
     auto filters = &config->filters;
 
     if (settings->authRequired)
-        filters->addFilter(std::make_unique<BasicAuthFilter>(settings));
+        filters->add(std::make_unique<BasicAuthFilter>(settings));
 
-    filters->addFilter(std::make_unique<CompressionFilter>());
+    filters->add(std::make_unique<CompressionFilter>());
 
     if (!settings->responseHeaders.empty())
-        filters->addFilter(std::make_unique<ResponseHeadersFilter>(settings));
+        filters->add(std::make_unique<ResponseHeadersFilter>(settings));
 
-    filters->addFilter(std::make_unique<CacheSupportFilter>());
-    filters->addFilter(std::make_unique<ExecuteHandlerFilter>());
+    filters->add(std::make_unique<CacheSupportFilter>());
+    filters->add(std::make_unique<ExecuteHandlerFilter>());
 
     PlayerController::defineRoutes(router, playerWorkQueue_.get(), player_);
     PlaylistsController::defineRoutes(router, playerWorkQueue_.get(), player_, settings);

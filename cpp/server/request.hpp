@@ -14,8 +14,11 @@ namespace msrv {
 class WorkQueue;
 
 class Request;
+
 class RequestHandler;
+
 class RequestHandlerFactory;
+
 class Response;
 
 using RequestHandlerPtr = std::unique_ptr<RequestHandler>;
@@ -36,6 +39,7 @@ public:
     Json postData;
     RequestHandlerPtr handler;
     std::unique_ptr<Response> response;
+    int lastFilter = -1;
 
     template<typename T>
     T param(const std::string& key);
@@ -49,8 +53,15 @@ public:
     template<typename T>
     boost::optional<T> optionalBodyParam(const std::string& key);
 
-    bool isProcessed() const { return isProcessed_; }
-    void setProcessed() { isProcessed_ = true; }
+    bool isProcessed() const
+    {
+        return isProcessed_;
+    }
+
+    void setProcessed()
+    {
+        isProcessed_ = true;
+    }
 
     const std::string& getHeader(const std::string& key)
     {
@@ -82,8 +93,9 @@ private:
 class RequestHandler
 {
 public:
-    RequestHandler();
-    virtual ~RequestHandler();
+    RequestHandler() = default;
+    virtual ~RequestHandler() = default;
+
     virtual std::unique_ptr<Response> execute() = 0;
 
     MSRV_NO_COPY_AND_ASSIGN(RequestHandler);
@@ -96,6 +108,7 @@ public:
 
     RequestHandlerFactory() = default;
     virtual ~RequestHandlerFactory() = default;
+
     virtual WorkQueue* workQueue() = 0;
     virtual RequestHandlerPtr createHandler(Request* request) = 0;
 
@@ -133,11 +146,11 @@ bool Request::tryGetParam(const Json& json, const std::string& key, T* outVal)
         *outVal = value->get<T>();
         return true;
     }
-    catch(std::exception& ex)
+    catch (std::exception& ex)
     {
         errorMessage = ex.what();
     }
-    catch(...)
+    catch (...)
     {
         errorMessage = "invalid value format";
     }

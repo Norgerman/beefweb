@@ -8,6 +8,7 @@
 namespace msrv {
 
 class BeastConnection;
+
 struct BeastConnectionContext;
 
 class BeastConnection : public std::enable_shared_from_this<BeastConnection>
@@ -19,7 +20,10 @@ public:
 
     ~BeastConnection();
 
-    bool busy() const { return busy_; }
+    bool busy() const
+    {
+        return busy_;
+    }
 
     void run();
     void abort();
@@ -34,8 +38,7 @@ public:
         beast::http::async_write(
             socket_,
             *response,
-            [thisPtr, close] (const boost::system::error_code& error, size_t)
-            {
+            [thisPtr, close](const boost::system::error_code& error, size_t) {
                 thisPtr->busy_ = false;
                 thisPtr->handleWriteResponse(error, close);
             });
@@ -50,8 +53,7 @@ public:
         beast::http::async_write_header(
             socket_,
             *serializer,
-            [thisPtr] (const boost::system::error_code& error, size_t)
-            {
+            [thisPtr](const boost::system::error_code& error, size_t) {
                 thisPtr->busy_ = false;
                 thisPtr->handleWriteResponseHeader(error);
             });
@@ -66,8 +68,7 @@ public:
         beast::http::async_write(
             socket_,
             *serializer,
-            [thisPtr, close] (const boost::system::error_code& error, size_t)
-            {
+            [thisPtr, close](const boost::system::error_code& error, size_t) {
                 thisPtr->busy_ = false;
                 thisPtr->handleWriteResponseBody(error, close);
             });
@@ -99,7 +100,9 @@ struct BeastConnectionContext
 {
     BeastConnectionContext()
         : activeConnections(),
-          eventListener(nullptr) { }
+          eventListener(nullptr)
+    {
+    }
 
     std::unordered_set<std::shared_ptr<BeastConnection>> activeConnections;
     RequestEventListener* eventListener;

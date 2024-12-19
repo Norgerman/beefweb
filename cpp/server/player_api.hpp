@@ -14,9 +14,13 @@
 namespace msrv {
 
 class WorkQueue;
+
 class Player;
+
 class PlayerOption;
+
 class BoolPlayerOption;
+
 class EnumPlayerOption;
 
 enum class PlaybackState
@@ -26,13 +30,15 @@ enum class PlaybackState
     PAUSED,
 };
 
-enum class PlayerEvent
+enum class PlayerEvents : int
 {
-    PLAYER_CHANGED,
-    PLAYLIST_SET_CHANGED,
-    PLAYLIST_ITEMS_CHANGED,
-    COUNT
+    NONE = 0,
+    PLAYER_CHANGED = 1,
+    PLAYLIST_SET_CHANGED = 2,
+    PLAYLIST_ITEMS_CHANGED = 4,
 };
+
+MSRV_ENUM_FLAGS(PlayerEvents, int);
 
 enum class VolumeType
 {
@@ -106,7 +112,9 @@ struct PlaylistItemInfo
     PlaylistItemInfo() = default;
 
     PlaylistItemInfo(std::vector<std::string> columnsVal)
-        : columns(std::move(columnsVal)) { }
+        : columns(std::move(columnsVal))
+    {
+    }
 
     PlaylistItemInfo(PlaylistItemInfo&&) = default;
     PlaylistItemInfo& operator=(PlaylistItemInfo&&) = default;
@@ -124,7 +132,9 @@ struct PlaylistItemsResult
         std::vector<PlaylistItemInfo> itemsVal)
         : offset(offsetVal),
           totalCount(totalCountVal),
-          items(std::move(itemsVal)) { }
+          items(std::move(itemsVal))
+    {
+    }
 
     PlaylistItemsResult(PlaylistItemsResult&&) = default;
     PlaylistItemsResult& operator=(PlaylistItemsResult&&) = default;
@@ -145,7 +155,9 @@ class PlaylistRef
 {
 public:
     PlaylistRef()
-        : index_(-1), id_() { }
+        : index_(-1), id_()
+    {
+    }
 
     explicit PlaylistRef(int32_t index)
         : index_(index), id_()
@@ -176,9 +188,15 @@ public:
 
     PlaylistRef& operator=(const PlaylistRef&) = default;
 
-    int32_t index() const { return index_; }
+    int32_t index() const
+    {
+        return index_;
+    }
 
-    const std::string& id() const { return id_; }
+    const std::string& id() const
+    {
+        return id_;
+    }
 
 private:
     int32_t index_;
@@ -211,10 +229,19 @@ struct ArtworkQuery
 
 struct ArtworkResult
 {
-    ArtworkResult() { }
+    ArtworkResult()
+    {
+    }
 
-    ArtworkResult(std::string filePathVal) : filePath(std::move(filePathVal)) { }
-    ArtworkResult(std::vector<uint8_t> fileDataVal) : fileData(std::move(fileDataVal)) { }
+    ArtworkResult(std::string filePathVal)
+        : filePath(std::move(filePathVal))
+    {
+    }
+
+    ArtworkResult(std::vector<uint8_t> fileDataVal)
+        : fileData(std::move(fileDataVal))
+    {
+    }
 
     ArtworkResult(const void* data, size_t size)
     {
@@ -233,12 +260,21 @@ class PlayerOption
 {
 public:
     PlayerOption(std::string id, std::string name)
-        : id_(std::move(id)), name_(std::move(name)) { }
+        : id_(std::move(id)), name_(std::move(name))
+    {
+    }
 
     virtual ~PlayerOption() = default;
 
-    const std::string& id() const { return id_; }
-    const std::string& name() const { return name_; }
+    const std::string& id() const
+    {
+        return id_;
+    }
+
+    const std::string& name() const
+    {
+        return name_;
+    }
 
 private:
     const std::string id_;
@@ -251,7 +287,9 @@ class BoolPlayerOption : public PlayerOption
 {
 public:
     BoolPlayerOption(std::string id, std::string name)
-        : PlayerOption(std::move(id), std::move(name)) { }
+        : PlayerOption(std::move(id), std::move(name))
+    {
+    }
 
     virtual bool getValue() const = 0;
     virtual void setValue(bool value) = 0;
@@ -279,9 +317,14 @@ class EnumPlayerOption : public PlayerOption
 {
 public:
     EnumPlayerOption(std::string id, std::string name, std::vector<std::string> enumNames)
-        : PlayerOption(std::move(id), std::move(name)), enumNames_(std::move(enumNames)) { }
+        : PlayerOption(std::move(id), std::move(name)), enumNames_(std::move(enumNames))
+    {
+    }
 
-    const std::vector<std::string>& enumNames() const { return enumNames_; }
+    const std::vector<std::string>& enumNames() const
+    {
+        return enumNames_;
+    }
 
     void validate(int32_t value)
     {
@@ -299,7 +342,7 @@ private:
 using PlayerStatePtr = std::unique_ptr<PlayerState>;
 using TrackQueryPtr = std::unique_ptr<TrackQuery>;
 using PlaylistQueryPtr = std::unique_ptr<PlaylistQuery>;
-using PlayerEventCallback = std::function<void(PlayerEvent)>;
+using PlayerEventsCallback = std::function<void(PlayerEvents)>;
 
 class Player
 {
@@ -329,7 +372,10 @@ public:
     virtual void seekRelative(double offsetSeconds) = 0;
     virtual void setVolume(double val) = 0;
 
-    const std::vector<PlayerOption*>& options() { return options_; }
+    const std::vector<PlayerOption*>& options()
+    {
+        return options_;
+    }
 
     PlayerOption* getOption(const std::string& id)
     {
@@ -344,7 +390,10 @@ public:
         throw InvalidRequestException("invalid option id: " + id);
     }
 
-    EnumPlayerOption* playbackModeOption() { return playbackModeOption_; }
+    EnumPlayerOption* playbackModeOption()
+    {
+        return playbackModeOption_;
+    }
 
     virtual TrackQueryPtr createTrackQuery(const std::vector<std::string>& columns) = 0;
 
@@ -396,11 +445,15 @@ public:
 
     // Artwork API
 
+    virtual boost::unique_future<ArtworkResult> fetchCurrentArtwork() = 0;
     virtual boost::unique_future<ArtworkResult> fetchArtwork(const ArtworkQuery& query) = 0;
 
     // Events API
 
-    void onEvent(PlayerEventCallback callback) { eventCallback_ = std::move(callback); }
+    void onEvents(PlayerEventsCallback callback)
+    {
+        eventsCallback_ = std::move(callback);
+    }
 
 protected:
     void addOption(PlayerOption* option)
@@ -421,14 +474,14 @@ protected:
         state->playbackModeOption = playbackModeOption_;
     }
 
-    void emitEvent(PlayerEvent event)
+    void emitEvents(PlayerEvents events)
     {
-        if (eventCallback_)
-            eventCallback_(event);
+        if (events != PlayerEvents::NONE && eventsCallback_)
+            eventsCallback_(events);
     }
 
 private:
-    PlayerEventCallback eventCallback_;
+    PlayerEventsCallback eventsCallback_;
     std::vector<PlayerOption*> options_;
     EnumPlayerOption* playbackModeOption_ = nullptr;
 

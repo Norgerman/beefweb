@@ -6,7 +6,9 @@ namespace msrv {
 namespace {
 
 const char INVALID_PLAYLIST_REF[] = "Invalid playlist reference";
+
 const char INVALID_PLAYBACK_STATE[] = "Invalid playback state";
+
 const char INVALID_VOLUME_TYPE[] = "Invalid volume type";
 
 }

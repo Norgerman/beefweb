@@ -3,6 +3,7 @@ set(
     .babelrc
     package.json
     webpack.config.js
+    src/album_art_viewer.js
     src/app.js
     src/app_model.js
     src/columns.js
@@ -89,8 +90,6 @@ endif()
 set(
     WEBUI_OUTPUT_FILES
     ${WEBUI_OUTPUT_DIR}/bundle.js
-    ${WEBUI_OUTPUT_DIR}/index.html
-    ${WEBUI_OUTPUT_DIR}/sprite.svg
 )
 
 set(
@@ -102,8 +101,9 @@ set(
 
 add_custom_command(
     OUTPUT ${WEBUI_OUTPUT_FILES}
-    DEPENDS ${WEBUI_SOURCES} ${JS_CLIENT_SOURCES} js_packages ${YARN_INTEGRITY}
+    DEPENDS ${WEBUI_SOURCES} ${JS_CLIENT_SOURCES} ${YARN_INTEGRITY} js_packages
     COMMAND ${YARN} build ${WEBUI_BUILD_ARGS}
+    COMMAND ${CMAKE_COMMAND} -E touch_nocreate ${WEBUI_OUTPUT_FILES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     VERBATIM
 )
@@ -112,4 +112,24 @@ add_custom_target(
     webui ALL
     DEPENDS ${WEBUI_OUTPUT_FILES}
     SOURCES ${WEBUI_SOURCES}
+)
+
+set(
+    LICENSES_FILE
+    ${WEBUI_OUTPUT_DIR}/third-party-licenses.txt
+)
+
+add_custom_command(
+    OUTPUT ${LICENSES_FILE}
+    DEPENDS ${EXTLIB_LICENSES_FILE} ${YARN_INTEGRITY} js_packages
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${WEBUI_OUTPUT_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${EXTLIB_LICENSES_FILE} ${LICENSES_FILE}
+    COMMAND ${YARN} licenses generate-disclaimer --silent --prod --cwd ${CMAKE_CURRENT_SOURCE_DIR} >> ${LICENSES_FILE}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    VERBATIM
+)
+
+add_custom_target(
+    licenses_file ALL
+    DEPENDS ${LICENSES_FILE}
 )

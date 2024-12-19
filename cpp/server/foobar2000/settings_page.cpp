@@ -12,20 +12,17 @@ namespace player_foobar2000 {
 
 // {69188A07-E885-462D-81B0-819768D56C06}
 const GUID SettingsPage::guid_ =
-    { 0x69188a07, 0xe885, 0x462d, { 0x81, 0xb0, 0x81, 0x97, 0x68, 0xd5, 0x6c, 0x6 } };
+    {0x69188a07, 0xe885, 0x462d, {0x81, 0xb0, 0x81, 0x97, 0x68, 0xd5, 0x6c, 0x6}};
 
 SettingsPage::SettingsPage() = default;
 SettingsPage::~SettingsPage() = default;
 
-preferences_page_instance::ptr SettingsPage::instantiate(
-    HWND parent, preferences_page_callback::ptr callback)
+preferences_page_instance::ptr SettingsPage::instantiate(HWND parent, preferences_page_callback::ptr callback)
 {
-    return preferences_page_instance::ptr(
-        new service_impl_t<SettingsPageInstance>(parent, callback));
+    return preferences_page_instance::ptr(new service_impl_t<SettingsPageInstance>(parent, callback));
 }
 
-SettingsPageInstance::SettingsPageInstance(
-    HWND parent, preferences_page_callback::ptr callback)
+SettingsPageInstance::SettingsPageInstance(HWND parent, preferences_page_callback::ptr callback)
     : parent_(parent),
       handle_(nullptr),
       callback_(callback)
@@ -60,8 +57,9 @@ t_uint32 SettingsPageInstance::get_state()
         | (hasChanges() ? preferences_state::changed : 0);
 }
 
-INT_PTR CALLBACK SettingsPageInstance::dialogProcWrapper(
-    HWND window, UINT message, WPARAM wparam, LPARAM lparam)
+INT_PTR CALLBACK
+
+SettingsPageInstance::dialogProcWrapper(HWND window, UINT message, WPARAM wparam, LPARAM lparam)
 {
     SettingsPageInstance* instance;
 
@@ -69,6 +67,7 @@ INT_PTR CALLBACK SettingsPageInstance::dialogProcWrapper(
     {
         instance = reinterpret_cast<SettingsPageInstance*>(lparam);
         instance->handle_ = window;
+
         SetWindowLongPtrW(window, DWLP_USER, lparam);
     }
     else
@@ -80,13 +79,13 @@ INT_PTR CALLBACK SettingsPageInstance::dialogProcWrapper(
     {
         INT_PTR result;
 
-        bool processed = tryCatchLog([&]
-        {
+        bool processed = tryCatchLog([&] {
             result = instance->dialogProc(message, wparam, lparam);
         });
 
         if (processed)
             return result;
+
     }
 
     return DefWindowProcW(window, message, wparam, lparam);
@@ -263,6 +262,9 @@ void SettingsPageInstance::updateAuthControls()
     EnableWindow(GetDlgItem(handle_, IDC_AUTH_PASSWORD), enabled);
 }
 
-namespace { preferences_page_factory_t<SettingsPage> factory; }
+namespace {
+preferences_page_factory_t<SettingsPage> factory;
+}
 
-}}
+}
+}

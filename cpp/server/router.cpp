@@ -23,8 +23,8 @@ NodeType getNodeType(const StringView& item)
     if (item.length() >= 2 && item[0] == ':')
     {
         return item.back() == '*'
-            ? NodeType::LONG_PARAMETER
-            : NodeType::PARAMETER;
+               ? NodeType::LONG_PARAMETER
+               : NodeType::PARAMETER;
     }
 
     return NodeType::STRING;
@@ -52,17 +52,36 @@ class Node
 {
 public:
     Node(NodeType type, std::string value)
-        : type_(type), value_(std::move(value)), factories_((size_t)HttpMethod::COUNT) { }
+        : type_(type), value_(std::move(value)), factories_((size_t) HttpMethod::COUNT)
+    {
+    }
 
     ~Node() = default;
 
-    NodeType type() const { return type_; }
-    const std::string& value() const { return value_; }
+    NodeType type() const
+    {
+        return type_;
+    }
 
-    std::multimap<NodeType, std::unique_ptr<Node>>& children() { return children_; }
-    const std::multimap<NodeType, std::unique_ptr<Node>>& children() const { return children_; }
+    const std::string& value() const
+    {
+        return value_;
+    }
 
-    bool hasRoutes() const { return hasRoutes_; }
+    std::multimap<NodeType, std::unique_ptr<Node>>& children()
+    {
+        return children_;
+    }
+
+    const std::multimap<NodeType, std::unique_ptr<Node>>& children() const
+    {
+        return children_;
+    }
+
+    bool hasRoutes() const
+    {
+        return hasRoutes_;
+    }
 
     bool matches(NodeType type, const std::string& value) const
     {
@@ -71,17 +90,17 @@ public:
 
     void defineRoute(HttpMethod method, RequestHandlerFactoryPtr factory)
     {
-        assert((size_t)method < factories_.size());
+        assert((size_t) method < factories_.size());
 
-        factories_[(size_t)method] = std::move(factory);
+        factories_[(size_t) method] = std::move(factory);
         hasRoutes_ = true;
     }
 
     RequestHandlerFactory* getRoute(HttpMethod method) const
     {
-        assert((size_t)method < factories_.size());
+        assert((size_t) method < factories_.size());
 
-        return factories_[(size_t)method].get();
+        return factories_[(size_t) method].get();
     }
 
 private:
@@ -99,7 +118,7 @@ private:
 
 using namespace router_internal;
 
-RouteResult::RouteResult(RequestHandlerFactory *factoryVal, HttpKeyValueMap paramsVal)
+RouteResult::RouteResult(RequestHandlerFactory* factoryVal, HttpKeyValueMap paramsVal)
     : factory(factoryVal), params(std::move(paramsVal)), errorResponse()
 {
 }
@@ -154,34 +173,34 @@ const Node* Router::matchNode(const Node* parent, Tokenizer* urlTokenizer, HttpK
 
         switch (node->type())
         {
-            case NodeType::STRING:
-            {
-                if (item == node->value())
-                    if (auto result = matchNode(node.get(), urlTokenizer, params))
-                        return result;
-
-                break;
-            }
-
-            case NodeType::PARAMETER:
-            {
-                params[node->value()] = item.to_string();
-
+        case NodeType::STRING:
+        {
+            if (item == node->value())
                 if (auto result = matchNode(node.get(), urlTokenizer, params))
                     return result;
 
-                auto it = params.find(node->value());
-                assert(it != params.end());
-                params.erase(it);
+            break;
+        }
 
-                break;
-            }
+        case NodeType::PARAMETER:
+        {
+            params[node->value()] = item.to_string();
 
-            case NodeType::LONG_PARAMETER:
-            {
-                params[node->value()] = remainingUrlPart.to_string();
-                return node.get();
-            }
+            if (auto result = matchNode(node.get(), urlTokenizer, params))
+                return result;
+
+            auto it = params.find(node->value());
+            assert(it != params.end());
+            params.erase(it);
+
+            break;
+        }
+
+        case NodeType::LONG_PARAMETER:
+        {
+            params[node->value()] = remainingUrlPart.to_string();
+            return node.get();
+        }
         }
     }
 
@@ -212,8 +231,8 @@ std::unique_ptr<RouteResult> Router::dispatch(const Request* request) const
     if (!factory)
     {
         auto status = node->hasRoutes()
-            ? HttpStatus::S_405_METHOD_NOT_ALLOWED
-            : HttpStatus::S_404_NOT_FOUND;
+                      ? HttpStatus::S_405_METHOD_NOT_ALLOWED
+                      : HttpStatus::S_404_NOT_FOUND;
 
         return std::make_unique<RouteResult>(Response::error(status));
     }

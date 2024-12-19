@@ -27,7 +27,8 @@ Path getUserConfigFile(const char* appName)
 {
     auto userConfigDir = getUserConfigDir();
 
-    if (userConfigDir.empty()) {
+    if (userConfigDir.empty())
+    {
         return Path();
     }
 
@@ -99,7 +100,7 @@ bool SettingsData::loadFromFile(const Path& path)
 {
     auto result = false;
 
-    tryCatchLog([&]{
+    tryCatchLog([&] {
         auto file = file_io::open(path);
         if (!file)
             return;

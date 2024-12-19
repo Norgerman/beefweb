@@ -20,4 +20,5 @@ struct SettingVars
     static void setMusicDirs(const std::vector<std::string>& dirs);
 };
 
-}}
+}
+}

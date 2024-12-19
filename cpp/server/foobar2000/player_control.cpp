@@ -55,8 +55,8 @@ std::vector<std::string> PlayerImpl::evaluatePlaybackColumns(const TitleFormatVe
 PlaybackState PlayerImpl::getPlaybackState()
 {
     if (playbackControl_->is_paused())
-       return PlaybackState::PAUSED;
-    
+        return PlaybackState::PAUSED;
+
     if (playbackControl_->is_playing())
         return PlaybackState::PLAYING;
 
@@ -272,4 +272,5 @@ TrackQueryPtr PlayerImpl::createTrackQuery(const std::vector<std::string>& colum
     return std::make_unique<TrackQueryImpl>(compileColumns(columns));
 }
 
-}}
+}
+}

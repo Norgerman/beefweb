@@ -12,7 +12,8 @@ namespace msrv {
 
 namespace router_internal { class Node; }
 
-template<typename T> class RouteBuilder;
+template<typename T>
+class RouteBuilder;
 
 class RouteResult
 {
@@ -37,7 +38,10 @@ public:
     void defineRoute(HttpMethod method, const std::string& path, RequestHandlerFactoryPtr factory);
 
     template<typename T>
-    RouteBuilder<T> defineRoutes() { return RouteBuilder<T>(this); }
+    RouteBuilder<T> defineRoutes()
+    {
+        return RouteBuilder<T>(this);
+    }
 
     std::unique_ptr<RouteResult> dispatch(const Request* request) const;
 
@@ -56,7 +60,10 @@ template<typename T>
 class RouteBuilder
 {
 public:
-    RouteBuilder(Router* router) : router_(router), workQueue_(nullptr) { }
+    RouteBuilder(Router* router)
+        : router_(router), workQueue_(nullptr)
+    {
+    }
 
     void createWith(ControllerFactory<T> factory)
     {
@@ -100,7 +107,7 @@ public:
 
     void post(const std::string& path, std::function<void(T*)> action)
     {
-        define(HttpMethod::POST, path, [=] (T* controller) {
+        define(HttpMethod::POST, path, [=](T* controller) {
             action(controller);
             return Response::ok();
         });

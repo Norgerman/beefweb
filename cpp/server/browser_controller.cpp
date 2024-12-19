@@ -74,16 +74,16 @@ ResponsePtr BrowserController::getRoots()
     for (auto& dir : settings_->musicDirs)
     {
         auto path = pathFromUtf8(dir);
-        auto info = file_io::queryInfo(path);
+        auto info = file_io::tryQueryInfo(path);
 
-        if (info.type == FileType::DIRECTORY)
-            roots.emplace_back(makeFsEntry(path, path, info));
+        if (info && info->type == FileType::DIRECTORY)
+            roots.emplace_back(makeFsEntry(path, path, *info));
     }
 
     return Response::json({
-        { "roots", roots },
-        { "pathSeparator", pathSeparator() }
-    });
+                              {"roots", roots},
+                              {"pathSeparator", pathSeparator()}
+                          });
 }
 
 ResponsePtr BrowserController::getEntries()
@@ -97,8 +97,8 @@ ResponsePtr BrowserController::getEntries()
     std::vector<FileSystemEntry> entries;
 
     for (auto iter = fs::directory_iterator(normalizedPath);
-        iter != fs::directory_iterator();
-        ++iter)
+         iter != fs::directory_iterator();
+         ++iter)
     {
         auto& path = iter->path();
         auto info = file_io::tryQueryInfo(path);
@@ -107,18 +107,17 @@ ResponsePtr BrowserController::getEntries()
             entries.emplace_back(makeFsEntry(path.filename(), path, *info));
     }
 
-    return  Response::json({
-        { "entries", entries },
-        { "pathSeparator", pathSeparator() }
-    });
+    return Response::json({
+                              {"entries", entries},
+                              {"pathSeparator", pathSeparator()}
+                          });
 }
 
 void BrowserController::defineRoutes(Router* router, WorkQueue* workQueue, SettingsDataPtr settings)
 {
     auto routes = router->defineRoutes<BrowserController>();
 
-    routes.createWith([=](Request* request)
-    {
+    routes.createWith([=](Request* request) {
         return new BrowserController(request, settings);
     });
 

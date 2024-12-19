@@ -193,8 +193,7 @@ bool PlayerImpl::playNextBy(const std::string& expression, PlayerImpl::PlaylistI
     context._size = sizeof(context);
     context.plt = playlist.get();
 
-    auto eval = [&context, &format, &expression] (DB_playItem_t* item, char* buffer)
-    {
+    auto eval = [&context, &format, &expression](DB_playItem_t* item, char* buffer) {
         context.it = item;
         auto ret = ddbApi->tf_eval(&context, format.get(), buffer, TITLE_FORMAT_BUFFER_SIZE);
         if (ret < 0)
@@ -259,7 +258,7 @@ void PlayerImpl::setMuted(Switch value)
         break;
     }
 
-    emitEvent(PlayerEvent::PLAYER_CHANGED);
+    emitEvents(PlayerEvents::PLAYER_CHANGED);
 }
 
 void PlayerImpl::seekAbsolute(double offsetSeconds)
@@ -291,4 +290,5 @@ void PlayerImpl::setVolume(double value)
     ddbApi->volume_set_db(clampVolume(value));
 }
 
-}}
+}
+}

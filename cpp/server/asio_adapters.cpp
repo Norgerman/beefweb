@@ -4,7 +4,9 @@
 namespace msrv {
 
 AsioWorkQueue::AsioWorkQueue(asio::io_context* context)
-    : context_(context) { }
+    : context_(context)
+{
+}
 
 AsioWorkQueue::~AsioWorkQueue() = default;
 
@@ -59,7 +61,7 @@ void AsioTimer::stop()
 void AsioTimer::schedule(DurationMs delay)
 {
     timer_.expires_from_now(boost::posix_time::millisec(delay.count()));
-    timer_.async_wait([this] (const boost::system::error_code& error) { handleTimeout(error); });
+    timer_.async_wait([this](const boost::system::error_code& error) { handleTimeout(error); });
 }
 
 void AsioTimer::handleTimeout(const boost::system::error_code& error)
@@ -77,7 +79,9 @@ void AsioTimer::handleTimeout(const boost::system::error_code& error)
 }
 
 AsioTimerFactory::AsioTimerFactory(asio::io_context* context)
-    : context_(context) { }
+    : context_(context)
+{
+}
 
 AsioTimerFactory::~AsioTimerFactory() = default;
 

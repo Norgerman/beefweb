@@ -4,7 +4,6 @@
 #include "../player_api.hpp"
 
 namespace msrv::player_foobar2000 {
-
 class PlaybackOrderOption : public EnumPlayerOption
 {
 public:
@@ -22,13 +21,18 @@ class StopAfterCurrentTrackOption : public BoolPlayerOption
 {
 public:
     explicit StopAfterCurrentTrackOption(playback_control* playbackControl);
+
     bool getValue() const override;
     void setValue(bool value) override;
-    void setCallback(PlayerEventCallback callback) { callback_ = std::move(callback); }
+
+    void setCallback(PlayerEventsCallback callback)
+    {
+        callback_ = std::move(callback);
+    }
 
 private:
     playback_control* playbackControl_;
-    PlayerEventCallback callback_;
+    PlayerEventsCallback callback_;
 };
 
 }

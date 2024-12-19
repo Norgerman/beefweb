@@ -27,7 +27,9 @@ public:
         ResponseCore* coreResponse)
         : connection_(connection),
           request_(request),
-          coreResponse_(coreResponse) { }
+          coreResponse_(coreResponse)
+    {
+    }
 
     std::shared_ptr<void> send() const
     {
@@ -113,7 +115,9 @@ public:
         ResponseCore::Body* source,
         beast::http::buffer_body::value_type* target)
         : source_(source),
-          target_(target) { }
+          target_(target)
+    {
+    }
 
     bool format() const
     {
@@ -239,7 +243,7 @@ void BeastRequest::sendResponse(ResponseCorePtr response)
 
 void BeastRequest::sendResponseBegin(ResponseCorePtr response)
 {
-    responseStream_ = std::make_unique<BeastResponseStream>(connection_,request_, response.get());
+    responseStream_ = std::make_unique<BeastResponseStream>(connection_, request_, response.get());
     responseStream_->writeHeader();
 }
 

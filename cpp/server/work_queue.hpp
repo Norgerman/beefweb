@@ -60,7 +60,11 @@ private:
     struct State
     {
         State() = default;
-        ~State() { destroyed.set_value(); }
+
+        ~State()
+        {
+            destroyed.set_value();
+        }
 
         std::mutex mutex;
         std::vector<WorkCallback> enqueued;

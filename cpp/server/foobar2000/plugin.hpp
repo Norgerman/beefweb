@@ -13,7 +13,10 @@ namespace player_foobar2000 {
 class Plugin
 {
 public:
-    static Plugin* current() { return current_; }
+    static Plugin* current()
+    {
+        return current_;
+    }
 
     Plugin();
     ~Plugin();
@@ -29,4 +32,5 @@ private:
     MSRV_NO_COPY_AND_ASSIGN(Plugin);
 };
 
-}}
+}
+}

@@ -4,15 +4,12 @@
 
 namespace msrv {
 
-namespace  {
+namespace {
 
 class EmptyRequestHandler : public RequestHandler
 {
 public:
-    EmptyRequestHandler() { }
-    virtual ~EmptyRequestHandler() { }
-
-    virtual std::unique_ptr<Response> execute() override
+    std::unique_ptr<Response> execute() override
     {
         return Response::custom(HttpStatus::S_204_NO_CONTENT);
     }
@@ -21,15 +18,12 @@ public:
 class EmptyRequestHandlerFactory : public RequestHandlerFactory
 {
 public:
-    EmptyRequestHandlerFactory() { }
-    virtual ~EmptyRequestHandlerFactory() { }
-
-    virtual WorkQueue* workQueue()
+    WorkQueue* workQueue() override
     {
         return nullptr;
     }
 
-    virtual RequestHandlerPtr createHandler(Request*)
+    RequestHandlerPtr createHandler(Request*) override
     {
         return std::make_unique<EmptyRequestHandler>();
     }
@@ -52,9 +46,7 @@ Request::Request(HttpMethod methodVal, std::string pathVal)
 {
 }
 
-Request::~Request()
-{
-}
+Request::~Request() = default;
 
 void Request::setErrorResponse(std::string message, std::string param)
 {
@@ -68,9 +60,6 @@ void Request::executeHandler()
     isHandlerExecuted_ = true;
     response = handler->execute();
 }
-
-RequestHandler::RequestHandler() = default;
-RequestHandler::~RequestHandler() = default;
 
 RequestHandlerFactory* RequestHandlerFactory::empty()
 {

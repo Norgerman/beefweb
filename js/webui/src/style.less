@@ -616,7 +616,7 @@ body {
     max-width: 62rem;
 }
 
-.st-compactmode .app {
+.st-mediasize-large-up.st-no-fullwidth.st-compactmode .app {
     .border-vertical();
 }
 
@@ -730,6 +730,27 @@ body {
     width: 6rem;
     margin-left: 0.25rem;
     height: 1.75rem;
+}
+
+.album-art-panel {
+    display: flex;
+}
+
+.album-art {
+    width: 100%;
+    object-fit: scale-down;
+    margin: 0.5rem;
+}
+
+.album-art-panel-default {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.album-art-default {
+    width: 8rem;
+    height: 8rem;
 }
 
 .settings-content-wrapper {

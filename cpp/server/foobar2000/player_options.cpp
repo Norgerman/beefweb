@@ -1,7 +1,6 @@
 #include "player_options.hpp"
 
-namespace msrv::player_foobar2000
-{
+namespace msrv::player_foobar2000 {
 
 PlaybackOrderOption::PlaybackOrderOption(playlist_manager_v4* playlistManager)
     : EnumPlayerOption("playbackOrder", "Playback order", getEnumNames(playlistManager)),
@@ -48,7 +47,6 @@ void StopAfterCurrentTrackOption::setValue(bool value)
     playbackControl_->set_stop_after_current(value);
 
     if (callback_)
-        callback_(PlayerEvent::PLAYER_CHANGED);
+        callback_(PlayerEvents::PLAYER_CHANGED);
 }
-
 }

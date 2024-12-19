@@ -13,29 +13,52 @@ namespace player_deadbeef {
 
 struct PlaylistMutex
 {
-    void lock() noexcept { ddbApi->pl_lock(); }
-    void unlock() noexcept { ddbApi->pl_unlock(); }
+    void lock() noexcept
+    {
+        ddbApi->pl_lock();
+    }
+
+    void unlock() noexcept
+    {
+        ddbApi->pl_unlock();
+    }
 };
 
 struct ConfigMutex
 {
-    void lock() noexcept { ddbApi->conf_lock(); }
-    void unlock() noexcept { ddbApi->conf_unlock(); }
+    void lock() noexcept
+    {
+        ddbApi->conf_lock();
+    }
+
+    void unlock() noexcept
+    {
+        ddbApi->conf_unlock();
+    }
 };
 
 struct PlaylistDeleter
 {
-    void operator()(ddb_playlist_t* playlist) noexcept { ddbApi->plt_unref(playlist); }
+    void operator()(ddb_playlist_t* playlist) noexcept
+    {
+        ddbApi->plt_unref(playlist);
+    }
 };
 
 struct PlaylistItemDeleter
 {
-    void operator()(ddb_playItem_t* item) noexcept { ddbApi->pl_item_unref(item); }
+    void operator()(ddb_playItem_t* item) noexcept
+    {
+        ddbApi->pl_item_unref(item);
+    }
 };
 
 struct TitleFormatDeleter
 {
-    void operator()(char* tf) noexcept { ddbApi->tf_free(tf); }
+    void operator()(char* tf) noexcept
+    {
+        ddbApi->tf_free(tf);
+    }
 };
 
 using ConfigLockGuard = std::lock_guard<ConfigMutex>;
@@ -71,7 +94,9 @@ class DeadbeefLogger final : public Logger
 {
 public:
     explicit DeadbeefLogger(DB_plugin_t* plugin)
-        : plugin_(plugin), prefix_(MSRV_PROJECT_ID ": ") { }
+        : plugin_(plugin), prefix_(MSRV_PROJECT_ID ": ")
+    {
+    }
 
     void log(LogLevel level, const char* string, va_list va) override;
 
@@ -80,4 +105,5 @@ private:
     std::string prefix_;
 };
 
-}}
+}
+}

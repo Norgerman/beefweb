@@ -5,14 +5,23 @@
 namespace msrv {
 
 const char HttpHeader::CONTENT_TYPE[] = "Content-Type";
+
 const char HttpHeader::CONTENT_LENGTH[] = "Content-Length";
+
 const char HttpHeader::AUTHORIZATION[] = "Authorization";
+
 const char HttpHeader::WWW_AUTHENTICATE[] = "Www-Authenticate";
+
 const char HttpHeader::IF_NONE_MATCH[] = "If-None-Match";
+
 const char HttpHeader::ETAG[] = "ETag";
+
 const char HttpHeader::CACHE_CONTROL[] = "Cache-Control";
+
 const char HttpHeader::ACCEPT_ENCODING[] = "Accept-Encoding";
+
 const char HttpHeader::CONTENT_ENCODING[] = "Content-Encoding";
+
 const char HttpHeader::LOCATION[] = "Location";
 
 std::string toString(HttpMethod method)

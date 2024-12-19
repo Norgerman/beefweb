@@ -15,8 +15,17 @@ ArtworkController::ArtworkController(Request* request, Player* player, const Con
 {
 }
 
-ArtworkController::~ArtworkController()
+ArtworkController::~ArtworkController() = default;
+
+ResponsePtr ArtworkController::getCurrentArtwork()
 {
+    auto responseFuture = player_->fetchCurrentArtwork().then(
+        boost::launch::sync, [this](boost::unique_future<ArtworkResult> resultFuture) {
+            auto result = resultFuture.get();
+            return getResponse(&result);
+        });
+
+    return Response::async(std::move(responseFuture));
 }
 
 ResponsePtr ArtworkController::getArtwork()
@@ -27,8 +36,7 @@ ResponsePtr ArtworkController::getArtwork()
     query.index = param<int32_t>("index");
 
     auto responseFuture = player_->fetchArtwork(query).then(
-        boost::launch::sync, [this] (boost::unique_future<ArtworkResult> resultFuture)
-        {
+        boost::launch::sync, [this](boost::unique_future<ArtworkResult> resultFuture) {
             auto result = resultFuture.get();
             return getResponse(&result);
         });
@@ -51,11 +59,13 @@ ResponsePtr ArtworkController::getResponse(ArtworkResult* result)
 
         auto fileInfo = file_io::queryInfo(fileHandle.get());
 
-        return Response::file(
+        auto response = Response::file(
             std::move(filePath),
             std::move(fileHandle),
-            std::move(fileInfo),
+            fileInfo,
             contentTypes_.byHeader(fileData));
+
+        return response;
     }
 
     if (!result->fileData.empty())
@@ -77,14 +87,14 @@ void ArtworkController::defineRoutes(
 {
     auto routes = router->defineRoutes<ArtworkController>();
 
-    routes.createWith([=](Request* request)
-    {
+    routes.createWith([=](Request* request) {
         return new ArtworkController(request, player, contentTypes);
     });
 
     routes.useWorkQueue(workQueue);
-    routes.setPrefix("api/artwork/:plref/:index");
-    routes.get("", &ArtworkController::getArtwork);
+    routes.setPrefix("api/artwork");
+    routes.get("current", &ArtworkController::getCurrentArtwork);
+    routes.get(":plref/:index", &ArtworkController::getArtwork);
 }
 
 }

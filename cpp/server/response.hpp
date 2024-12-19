@@ -10,14 +10,21 @@
 namespace msrv {
 
 class Response;
+
 class ResponseHandler;
 
 class SimpleResponse;
+
 class DataResponse;
+
 class JsonResponse;
+
 class FileResponse;
+
 class EventStreamResponse;
+
 class AsyncResponse;
+
 class ErrorResponse;
 
 using ResponsePtr = std::unique_ptr<Response>;
@@ -42,7 +49,10 @@ public:
     static std::unique_ptr<EventStreamResponse> eventStream(EventStreamSource source);
     static std::unique_ptr<AsyncResponse> async(ResponseFuture response);
 
-    static std::unique_ptr<ErrorResponse> notFound() { return error(HttpStatus::S_404_NOT_FOUND); }
+    static std::unique_ptr<ErrorResponse> notFound()
+    {
+        return error(HttpStatus::S_404_NOT_FOUND);
+    }
 
     static std::unique_ptr<ErrorResponse> error(
         HttpStatus status,
@@ -73,7 +83,6 @@ public:
 
     void process(ResponseHandler* handler) override;
 };
-
 
 class DataResponse : public Response
 {

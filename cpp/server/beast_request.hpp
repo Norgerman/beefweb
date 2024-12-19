@@ -7,6 +7,7 @@
 namespace msrv {
 
 class BeastConnection;
+
 class BeastResponseStream;
 
 class BeastRequest : public RequestCore
@@ -24,7 +25,10 @@ public:
     virtual HttpKeyValueMap queryParams() override;
     virtual StringView body() override;
 
-    virtual void releaseResources() override { }
+    virtual void releaseResources() override
+    {
+    }
+
     virtual void abort() override;
 
     virtual void sendResponse(ResponseCorePtr response) override;

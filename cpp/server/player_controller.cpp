@@ -22,7 +22,9 @@ void from_json(const Json& json, SetOptionRequest& request)
 }
 
 PlayerController::PlayerController(Request* request, Player* player)
-    : ControllerBase(request), player_(player) { }
+    : ControllerBase(request), player_(player)
+{
+}
 
 ResponsePtr PlayerController::getState()
 {
@@ -33,7 +35,7 @@ ResponsePtr PlayerController::getState()
 
     auto state = player_->queryPlayerState(query.get());
 
-    return Response::json({{ "player", *state }});
+    return Response::json({{"player", *state}});
 }
 
 void PlayerController::setState()
@@ -137,8 +139,7 @@ void PlayerController::defineRoutes(Router* router, WorkQueue* workQueue, Player
 {
     auto routes = router->defineRoutes<PlayerController>();
 
-    routes.createWith([=](Request* request)
-    {
+    routes.createWith([=](Request* request) {
         return new PlayerController(request, player);
     });
 
